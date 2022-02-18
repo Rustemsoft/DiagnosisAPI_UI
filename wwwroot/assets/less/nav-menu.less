@@ -1,0 +1,308 @@
+// Preset 
+@import "presets.less";
+
+/* ==========================================================================
+   Roof Section Start
+   ========================================================================== */
+	#roof{
+		color: #fff;
+		font-size: 14px;
+		background: @preset;
+		padding: 10px 0px;
+		.name{
+			font-size: 16px;
+			font-weight: 500;
+		}
+		.quick-contacts span{		
+			padding-left: 15px;
+			a{
+				color: #fff;
+        -webkit-transition: all 0.2s linear;
+        -moz-transition: all 0.2s linear;
+        -o-transition: all 0.2s linear;
+        transition: all 0.2s linear;
+				&:hover{
+          opacity: 0.8;
+				}
+			}
+			i{
+				margin-right: 5px;
+			}
+		}
+	}
+
+/* ==========================================================================
+   Menu Search 
+   ========================================================================== */
+	.search{
+		display: none;
+	}
+	.header-search{
+		display: inline-block;
+		margin-left: 20px;
+		margin-top: 15px;
+	}
+	.open-search{
+		background: @preset;
+		color: #fff;
+		border-radius: 50px;
+		display: inline-block;
+		height: 36px;
+		cursor: pointer;
+		line-height: 35px;
+		text-align: center;
+		width: 36px;
+    &:hover{
+      color: #fff;
+    }
+	}
+  .full-search{
+     z-index: 9999;
+     position: absolute;
+     top: 70px;     
+     display: none;
+     margin-bottom: -1px;
+      &:before{
+        position: absolute;
+        top: -8px;
+        right: 38px;
+        display: block;
+        content: "";
+        width: 0px;
+        height: 0px;
+        border-style: solid;
+        border-width: 0px 8px 8px;
+        border-color: transparent transparent @preset;
+        box-sizing: border-box;
+     }
+     .form-control:focus{
+        border: none;
+     }  
+     .close-search{
+        cursor: pointer;
+        font-size: 24px;
+        color: @preset;
+        top: 10px;
+        right: 24px;
+        position: absolute;
+     }
+  }
+  .full-search input[type="text"]{
+     outline: none;
+     font-size: 16px;
+     display: inline-block;
+     color: #999;
+     border-top: 2px solid @preset;
+     background: #fff;
+     font-weight: 400;
+     line-height: 30px;
+     width: 260px;
+     position: absolute;
+     right: 10px;  
+     &:focus{
+      border-top: 2px solid @preset;
+     }
+  }
+
+/* ==========================================================================
+   Main Menu 
+   ========================================================================== */
+   .main-navigation{
+   	position: relative;
+   	background: #fff;
+   	padding: 0;
+   	.navbar-brand{
+   		width: 142px;
+   		height: auto;
+      padding: 0 0 0 15px;
+
+   	}
+   	.navbar-nav{
+   		> li > a, > li > a:focus {
+   			font-size: 14px;
+		    padding: 25px 20px;
+		    margin: 0px;
+		    outline: 0;
+		    color: #656565;
+		    font-weight: 400;
+		    position: relative;
+        background: transparent;
+        letter-spacing: .3px;
+        text-transform: uppercase;
+   		}
+      > li a:focus > a{background: transparent;}
+      > li.open > a:focus,
+      > li.open > a:active{background: transparent!important;}
+
+
+      > li > a:hover, > .active > a, > li.open > a, > .active > a:hover, 
+      > .active > a:focus, > .open > a:hover{background: transparent; color: @preset;}
+
+      > .dropdown:hover > ul.dropdown-menu{
+        display: block;
+        -webkit-animation: fadeInUpMenu .5s;
+        -moz-animation: fadeInUpMenu .5s;
+        -ms-animation: fadeInUpMenu .5s;
+        -o-animation: fadeInUpMenu .5s;
+        animation: fadeInUpMenu .5s;
+      }
+   	}
+   .navbar-nav > li > a:hover,
+   .navbar-nav > li > a:focus,
+   .navbar-nav > li.active > a,
+   .navbar-nav > li.open > a{
+      color: @preset;
+    }
+  .dropdown-menu{
+    position: absolute;
+    border: 0;
+    margin: 0;
+    padding: 0;
+    border-radius: 3px;
+    left: 0;
+    min-width: 200px;
+    background: #ffffff;
+    box-shadow: 0 6px 12px rgba(0,0,0,.175);
+	}
+  .dropdown-menu > li > a{
+    padding: 7px 30px 7px 20px;
+    font-size: 14px;
+    color: #656565;
+    font-weight: 400;
+    border-bottom: 1px solid rgba(0,0,0,.1);
+    letter-spacing: .3px;
+    line-height: 32px;
+  }
+}
+.dropdown-menu > li > a:focus,
+.dropdown-menu> li > a:hover,
+.dropdown-menu> li > a.active{
+  background: @preset;
+  color: #fff;
+}
+
+   //Nav Bar Styles
+  .navbar{margin-bottom: 0;}
+
+  //Sticky Nav
+  .affix{
+    width: 100%; 
+    top: 0px; 
+    position: fixed;
+    z-index: 99999; 
+    box-shadow: 0 0 3px rgba(000,000,000,.2);
+    -webkit-animation-duration: 1s;
+    animation-duration: 1s;
+    -webkit-animation-fill-mode: both;
+    animation-fill-mode: both;
+    -webkit-animation-name: fadeInDown;
+    animation-name: fadeInDown;
+   .navbar-brand{
+      width: 142px;
+    }
+    .navbar-brand{
+    padding: 0 0 0 25px;
+    }
+    .navbar-nav > li > a, 
+    .navbar-nav > li > a:focus{padding: 18px 20px;}
+    .header-search{
+      margin-top: 8px;
+    }
+  }
+
+	//Animation for Menu
+
+	@-webkit-keyframes fadeInUpMenu { 
+	    0% { 
+	        opacity: 0; 
+	        -webkit-transform: translateY(20px); 
+	    } 
+	    100% { 
+	        opacity: 1; 
+	        -webkit-transform: translateY(0); 
+	    } 
+	} 
+
+	@keyframes fadeInUpMenu { 
+	    0% { 
+	        opacity: 0; 
+	        transform: translateY(20px); 
+	    } 
+	    100% { 
+	        opacity: 1; 
+	        transform: translateY(0); 
+	    } 
+	} 
+
+	.fadeInUpMenu { 
+	    -webkit-animation-name: fadeInUpMenu; 
+	    animation-name: fadeInUpMenu;
+	}
+
+	  //Animation for Menu
+	  @-webkit-keyframes MenuFadeIn {
+	    0% {
+	      opacity:0;
+	    }
+	    100% {
+	      opacity:1;
+	    }
+	  }
+	  @keyframes MenuFadeIn {
+	    0% {
+	      opacity:0;
+	    }
+	    100% {
+	      opacity:1;
+	    }
+	  }
+
+	// Mobile Menu
+	.active.slicknav_collapsed, .slicknav_parent.slicknav_open {
+	  background: #eee;
+	}
+
+	.wpb-mobile-menu{
+	  display: none;
+    ul{
+      li > ul{
+        padding: 0;
+        border-style: solid;
+        border-width: 4px 0 0 0;
+        border-radius: 0;
+        left: 0;
+        right: 0;
+        border-color: transparent;
+        > li > a{color: #666; padding: 10px 0 10px 15px; &:hover, .active{background: #ecf0f1;}}
+        > li.active > a{background: #ecf0f1;}
+
+      }
+    }
+	}	
+	.slicknav_menu {
+	  display:none;
+	}
+	@media screen and (max-width: 767px) {
+	  .navbar-brand{
+	    position: absolute;
+	      top: 0;
+	  }
+	  /* #menu is the original menu */
+	   #wpb-mobile-menu {
+	    display:none;
+	  }
+	  
+	  .slicknav_menu {
+	    display:block;
+	  }
+	}
+	/* SlickMenu responsive */
+	@media screen and (max-width: 768px) {
+	  .navbar-toggle{
+	    display: none;
+	  }
+	  
+	}
+
+	
+	

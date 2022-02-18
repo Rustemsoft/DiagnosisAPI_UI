@@ -1,0 +1,425 @@
+﻿@model DDxApi.Models.TestGetType
+
+@{
+    ViewBag.Title = "Edit Test";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    bool displayUnits = false;
+    bool displayBoolean = false;
+    bool displayCombo = false;
+    bool displayRanges = false;
+    string color = "#FFF";
+    string comment = "";
+    int referenceType = 0;
+    string hiddenCU = "";
+    string hiddenSI = "";
+    try
+    {
+        if (Model != null)
+        {
+            displayUnits = Model.UnitsType.IndexOf("Units: ") == 0;
+            displayBoolean = Model.UnitsType.ToLower().IndexOf("boolean") == 0;
+            displayCombo = Model.UnitsType.ToLower().IndexOf("combo") == 0;
+            displayRanges = (Model.UnitsTypeSI ?? "").Trim() != string.Empty;
+            comment = (Model.Comment ?? "");
+            referenceType = Model.ReferenceType;
+            hiddenCU = Model.UnitsType + ";" + Model.LowRangeValueSI;
+            hiddenSI = Model.UnitsTypeSI + ";" + Model.HighRangeValueSI;
+            if (displayUnits && referenceType == 1)
+                Model.UnitsType = Model.UnitsTypeSI;
+        }
+    }
+    catch { }
+    IList<string> boolDropdownList = new List<string>();
+    boolDropdownList.Add("Negative");
+    boolDropdownList.Add("Positive");
+    IList<string> comboDropdownList = new List<string>();
+    if (Model != null)
+    {
+        if (displayCombo)
+        {
+            comboDropdownList.Add(Model.NegativeComboValue);
+            foreach (string str in Model.ComboValuesList.Split(';').ToList())
+                comboDropdownList.Add(str);
+        }
+        if (Model.Status == "1")
+            color = "#FFE6EE"; //light pink
+        if (Model.Status == "-1")
+            color = "#B7E9F7"; //light blue
+    }
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div class="activity-item align-content-center">
+            <div class="row text-center">
+                <div class="col-xl-1 col-lg-1 mx-1">
+                </div>
+                <div class="col-xl-10 col-lg-10 mx-10">
+                    <form method="post" data-ajax="true" data-ajax-method="post">
+                        <div class="row text-center">
+                            <div class="col-xl-1 col-lg-1 mx-1">
+                            </div>
+                            <div class="col-xl-6 col-lg-6 mx-6">
+                                <label class="text-info">EDIT Procedure (Test Name)</label>
+                                <div id="divTests" style="height: 75px;">
+                                    @Html.DropDownListFor(model => model.ID, new SelectList(Startup.testsDropdownListAll, "id", "procedure"), "∙ Select Test", new { @class = "form-control", @style = "width: 100%;", id = "ddlTests" })
+                                </div>
+
+                                @Html.DropDownListFor(model => model.ID, new SelectList(Startup.testsDropdownList, "id", "procedure"), "∙ Select Test", new { @class = "form-control", @style = "display: none;", id = "ddlTestsByPanel" })
+                            </div>
+                            <div class="col-xl-1 col-lg-1 mx-1">
+                                    <div id="hideDetails" style="padding-top: 30px;" onclick="ShowDetails(true)" role="button">
+                                        <span style="color: #0679c4;">Details</span>
+                                    </div>
+                                    <div id="showDetails" style="display:none;" onclick="HideDetails()" role="button">
+                                        <label>Hide Details</label>
+                                    </div>
+                            </div>
+                            <div class="col-xl-3 col-lg-3 mx-3">
+                                <label class="text-info">Test Panel</label>
+                                @Html.DropDownList("panels", new SelectList(Startup.panelsDropdownList, "sid", "panel"), null, new { @class = "form-control", id = "ddlPanels" })
+                            </div>
+                            <div class="col-xl-1 col-lg-1 mx-1">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-xl-1 col-lg-1 mx-1">
+                </div>
+            </div>
+            <div class="row text-center">
+                <div class="col-xl-1 col-lg-1 mx-1">
+                </div>
+                <div class="description col-xl-10 col-lg-10 mx-10" style="display:none;">
+                        <label id="testComment" style="color: darkslategray; font-family: verdana, arial, helvetica, sans-serif; font-size: 70%;">@comment</label>
+                </div>
+                <div class="col-xl-1 col-lg-1 mx-1">
+                </div>
+            </div>
+        </div>
+
+        <div class="activity-item" id="lowPortion">
+            <div>
+                @Html.LabelFor(model => model.Value, htmlAttributes: new { @class = "control-label col-md-2" })
+                <table>
+                    <tr>
+                        <td>
+                            @Html.EditorFor(model => model.Value, new { htmlAttributes = new { @style = "display:" + (@displayUnits ? "" : "none") + "; background-color: " + @color, @class = "form-control", id = "testValue" } })
+                            @Html.ValidationMessageFor(model => model.Value, "", new { @class = "text-danger" })
+
+                            @Html.DropDownListFor(model => model.Value, new SelectList(boolDropdownList), null, new { @style = "display:" + (@displayBoolean ? "" : "none") + "; background-color: " + @color, @class = "form-control", id = "testBooleanValue" })
+
+                            @Html.DropDownListFor(model => model.Value, new SelectList(comboDropdownList), null, new { @style = "display:" + (@displayCombo ? "" : "none") + "; background-color: " + @color, @class = "form-control", id = "testComboValue" })
+                        </td>
+                        <td width="5" />
+                        <td>
+                            @Html.EditorFor(model => model.UnitsType, new { htmlAttributes = new { @readonly = "true", @style = "display:" + (@displayUnits ? "" : "none"), @class = "form-control", id = "testUnits" } })
+                        </td>
+                    </tr>
+                </table>
+
+                @Html.LabelFor(model => model.LowRangeValue, htmlAttributes: new { @style = "display:" + (@displayUnits ? "" : "none"), @class = "control-label col-md-2", id = "testLowRangeValueTitle" })
+                <table>
+                    <tr>
+                        <td>
+                            @Html.EditorFor(model => model.LowRangeValue, new { htmlAttributes = new { @type = (@displayUnits ? "number" : "none"), @step = "0.001", @style = "display:" + (@displayUnits ? "" : "none"), @class = "form-control", id = "testLowRangeValue" } })
+                            @Html.ValidationMessageFor(model => model.LowRangeValue, "", new { @class = "text-danger" })
+                        </td>
+                    </tr>
+                </table>
+                @Html.LabelFor(model => model.HighRangeValue, htmlAttributes: new { @value = "0", @style = "display:" + (@displayUnits ? "" : "none"), @class = "control-label col-md-2", id = "testHighRangeValueTitle" })
+                <table>
+                    <tr>
+                        <td>
+                            @Html.EditorFor(model => model.HighRangeValue, new { htmlAttributes = new { @type = (@displayUnits ? "number" : "none"), @step = "0.001", @style = "display:" + (@displayUnits ? "" : "none"), @class = "form-control", id = "testHighRangeValue" } })
+                            @Html.ValidationMessageFor(model => model.HighRangeValue, "", new { @class = "text-danger" })
+                        </td>
+                    </tr>
+                </table>
+
+                <table>
+                    <tr>
+                        <td>
+                            <div class="btn-group" data-toggle="buttons" id="btnsgroup" style="@("display:" + (@displayRanges ? "" : "none"))">
+                                <input type="button" id="rbCU" value="Conventional Units" class="@("btn " + (@referenceType > 0 ? "btn-secondary" : "btn-primary active"))" />
+                                <label class="btn btn-outline-light"> </label>
+                                <input type="button" id="rbSI" value="SI Reference Ranges" class="@("btn " + (@referenceType > 0 ? "btn-primary active" : "btn-secondary"))" />
+                            </div>
+                            @Html.HiddenFor(model => model.ReferenceType, new { id = "hiddenReferenceType", Value = @referenceType })
+                            @Html.Hidden("hiddenCU", @hiddenCU)
+                            @Html.Hidden("hiddenSI", @hiddenSI)
+                        </td>
+                        <td width="15" />
+                        <td align="right">
+                            <label class="btn btn-outline-light"> </label>
+                            <input type="submit" value="save" class="btn btn-success btn-sm" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            @if (ViewBag.Message != null) // Show popup alert message
+            {
+                <script type="text/javascript">
+                    window.onload = function () {
+                        alert("@ViewBag.Message");
+                    };
+                </script>
+            }
+
+        </div>
+    </div>
+}
+<br />
+<br />
+<br />
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            $("#ddlTests").change(function () {
+                setDdlTests($('#ddlTests'), false);
+                document.getElementById('ddlTestsByPanel').value = document.getElementById('ddlTests').value;
+            });
+
+            $("#ddlTestsByPanel").change(function () {
+                setDdlTests($('#ddlTestsByPanel'), false);
+                document.getElementById('ddlTests').value = document.getElementById('ddlTestsByPanel').value;
+            });
+
+            $("#ddlPanels").change(function () {
+                var viewModel = { sid: $('#ddlPanels').val() };
+                $.ajax({
+                    type: 'GET',
+                    dataType: 'json',
+                    cache: false,
+                    url: '@Url.Content("~/Home/PanelChangeGet")',
+                    data: viewModel,
+                    success: function (data) {
+                        if (data != null) {
+                            var newOptions = (data).split(";");
+                            var $el = $("#ddlTestsByPanel");
+                            $el.empty(); // remove old options
+                            var div_data = "<option value=0>∙ Select Test </option>";
+                            $(div_data).appendTo($el);
+                            $.each(newOptions, function (i, val) {
+                                if (val !== "") {
+                                    var opt = (val).split("|");
+                                    var div_data = "<option value=" + opt[0] + ">" + opt[1] + "</option>";
+                                    $(div_data).appendTo($el);
+                                }
+                            });
+                        }
+                        if (viewModel.sid == "0") {
+                            $('#divTests').show();
+                            $('#ddlTestsByPanel').hide();
+                            setDdlTests($('#ddlTests'), true);
+                            document.getElementById('ddlTestsByPanel').value = document.getElementById('ddlTests').value;
+                        } else {
+                            $('#divTests').hide();
+                            $('#ddlTestsByPanel').show();
+                            setDdlTests($('#ddlTestsByPanel'), true);
+                            document.getElementById('ddlTests').value = document.getElementById('ddlTestsByPanel').value;
+                        }
+                    }
+                });
+            });
+
+            $("#testValue").change(function () {
+                valueStatusBackgroundColor();
+            });
+
+            $("#testLowRangeValue").change(function () {
+                valueStatusBackgroundColor();
+            });
+
+            $("#testHighRangeValue").change(function () {
+                valueStatusBackgroundColor();
+            });
+
+            $("#testBooleanValue").change(function () {
+                document.getElementById('testValue').value = document.getElementById('testBooleanValue').value;
+                var color = "#FFFFFF";
+                if (document.getElementById('testBooleanValue').value === "Positive")
+                    color = "#FFE6EE"; //light pink
+                $('#testBooleanValue').css({ backgroundColor: color });
+            });
+
+            $("#testComboValue").change(function () {
+                document.getElementById('testValue').value = document.getElementById('testComboValue').value;
+                var negativeComboValue = $('#testComboValue')[0][0].innerText;
+                var color = "#FFFFFF";
+                if (document.getElementById('testComboValue').value !== negativeComboValue)
+                    color = "#FFE6EE"; //light pink
+                $('#testComboValue').css({ backgroundColor: color });
+            });
+
+            $("#rbCU").click(function () {
+                document.getElementById('hiddenReferenceType').value = 0;
+                document.getElementById('rbSI').classList = "btn btn-secondary";
+                document.getElementById('rbCU').classList = "btn btn-primary active";
+                var arr = document.getElementById('hiddenCU').value.split(";");
+                document.getElementById('testUnits').value = arr[0];
+                document.getElementById('testLowRangeValue').value = arr[1];
+                document.getElementById('testHighRangeValue').value = arr[2];
+                valueStatusBackgroundColor();
+            });
+
+            $("#rbSI").click(function () {
+                document.getElementById('hiddenReferenceType').value = 1;
+                document.getElementById('rbCU').classList = "btn btn-secondary";
+                document.getElementById('rbSI').classList = "btn btn-primary active";
+                var arr = document.getElementById('hiddenSI').value.split(";");
+                document.getElementById('testUnits').value = arr[0];
+                document.getElementById('testLowRangeValue').value = arr[1];
+                document.getElementById('testHighRangeValue').value = arr[2];
+                valueStatusBackgroundColor();
+            });
+        });
+
+        function setDdlTests(sel, empty) {
+            if ((document.getElementById('hiddenReferenceType').value ?? "") === "") {
+                document.getElementById('hiddenReferenceType').value = 0;
+            }
+            if (empty) {
+                $('#lowPortion').hide();
+                document.getElementById('testComment').textContent = '';
+            } else {
+                $('#lowPortion').show();
+            }
+
+            var _model = { id: sel.val(), Value: $('#testValue').val(), LowRangeValue: 1, HighRangeValue: 100 };
+            $.ajax({
+                type: 'GET',
+                dataType: 'json',
+                cache: false,
+                url: '@Url.Content("~/Home/TestChangeGet")',
+                data: _model,
+                success: function (response) {
+                    if (response != null) {
+                        if (response.comment.indexOf('test is already added') >= 0) {
+                            alert(response.comment);
+                            document.getElementById('ddlTests').value = response.id;
+                            document.getElementById('ddlTestsByPanel').value = response.id;
+                        }
+                        var color = "#FFFFFF";
+                        if (response.status === "1")
+                            color = "#FFE6EE"; //light pink
+                        if (response.status === "-1")
+                            color = "#B7E9F7"; //light blue
+                        document.getElementById('testValue').value = response.value;
+                        document.getElementById('testUnits').value = response.unitsType;
+                        document.getElementById('testLowRangeValue').value = response.lowRangeValue;
+                        document.getElementById('testHighRangeValue').value = response.highRangeValue;
+                        document.getElementById('testComment').textContent = !empty ? response.comment : '';
+                        if (response.unitsType.substring(0, 7) !== 'Units: ') {
+                            $('#testUnits').hide();
+                            $('#testValue').hide();
+                            if (response.unitsType !== 'Combo') {
+                                document.getElementById('testValue').value = document.getElementById('testBooleanValue').value;
+                                $('#testBooleanValue').show();
+                                $('#testComboValue').hide();
+                            }
+                            else {
+                                var newOptions = (response.negativeComboValue + ";" + response.comboValuesList).split(";");
+                                var $el = $("#testComboValue");
+                                $el.empty(); // remove old options
+                                $.each(newOptions, function (key, value) {
+                                    $el.append($("<option></option>")
+                                        .attr("value", value).text(value));
+                                });
+
+                                document.getElementById('testValue').value = document.getElementById('testComboValue').value;
+                                $('#testComboValue').show();
+                                $('#testBooleanValue').hide();
+                            }
+                            document.getElementById('testLowRangeValue').type = 'none';
+                            document.getElementById('testHighRangeValue').type = 'none';
+                            document.getElementById('btnsgroup').type = 'none';
+                            $('#testLowRangeValue').hide();
+                            $('#testLowRangeValueTitle').hide();
+                            $('#testHighRangeValue').hide();
+                            $('#testHighRangeValueTitle').hide();
+                            $('#btnsgroup').hide();
+                        } else {
+                            if (!(/^\d+$/.test(response.value)))
+                                document.getElementById('testValue').value = 0;
+                            $('#testUnits').show();
+                            $('#testValue').show();
+                            $('#testBooleanValue').hide();
+                            $('#testComboValue').hide();
+                            document.getElementById('testLowRangeValue').type = 'number';
+                            document.getElementById('testHighRangeValue').type = 'number';
+                            $('#testLowRangeValue').show();
+                            $('#testLowRangeValueTitle').show();
+                            $('#testHighRangeValue').show();
+                            $('#testHighRangeValueTitle').show();
+                            $('#btnsgroup').show();
+                            if (response.referenceType == 1)
+                                document.getElementById('testUnits').value = response.unitsTypeSI;
+                        }
+                        if ((response.unitsTypeSI ?? "").substring(0, 7) !== 'Units: ') {
+                            $('#btnsgroup').hide();
+                        } else {
+                            $('#btnsgroup').show();
+                            if ((response.referenceType ?? 0) === 0) {
+                                document.getElementById('rbCU').classList = "btn btn-primary active";
+                                document.getElementById('rbSI').classList = "btn btn-secondary";
+                            } else {
+                                document.getElementById('rbCU').classList = "btn btn-secondary";
+                                document.getElementById('rbSI').classList = "btn btn-primary active";
+                            }
+                            document.getElementById('hiddenCU').value = response.unitsType + ";" + response.lowRangeValueSI;
+                            document.getElementById('hiddenSI').value = response.unitsTypeSI + ";" + response.highRangeValueSI;
+                        }
+                        $('#testValue').css({ backgroundColor: color });
+                        $('#testBooleanValue').css({ backgroundColor: color });
+                        $('#testComboValue').css({ backgroundColor: color });
+                    } else {
+                        alert("Something went wrong");
+                    }
+                }
+            });
+        }
+
+        function valueStatusBackgroundColor() {
+            if (isNumeric(document.getElementById('testValue').value) &&
+                isNumeric(document.getElementById('testLowRangeValue').value) &&
+                isNumeric(document.getElementById('testHighRangeValue').value)) {
+                var value = parseFloat(document.getElementById('testValue').value);
+                var lowRangeValue = parseFloat(document.getElementById('testLowRangeValue').value);
+                var highRangeValue = parseFloat(document.getElementById('testHighRangeValue').value);
+                var color = "#FFFFFF";
+                if (value > highRangeValue)
+                    color = "#FFE6EE"; //light pink
+                if (value < lowRangeValue)
+                    color = "#B7E9F7"; //light blue
+                $('#testValue').css({ backgroundColor: color });
+            }
+        }
+
+        function isNumeric(str) {
+            if (typeof str != "string") return false
+            return !isNaN(str) && !isNaN(parseFloat(str))
+        }
+
+        function HideDetails() {
+            $('.description').hide();
+            $('#hideDetails').show();
+            $('#showDetails').hide();
+        }
+
+        function ShowDetails(show) {
+            if (show) {
+                $('.description').show();
+                $('#hideDetails').hide();
+                $('#showDetails').show();
+            }
+        }
+    </script>
+}

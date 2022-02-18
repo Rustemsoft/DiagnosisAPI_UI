@@ -1,0 +1,332 @@
+﻿@model DDxApi.Models.TestsSymptomsModel
+
+<style>
+    .whiteColor {
+        background-color: #FFF;
+    }
+
+    .lowColor {
+        background-color: #B7E9F7;
+    }
+
+    .highColor {
+        background-color: #FFE6EE;
+    }
+</style>
+
+<div id="progress" class="text-center">
+    <p>
+        WAIT...
+    </p>
+</div>
+
+<div id="broken" class="text-center" style="display:none">
+    <p>
+        NO CONNECTION...
+    </p>
+</div>
+
+<div id="workZone" style="display:none">
+    <div class="activity-item active-item align-content-center">
+        <table style="margin-bottom:6px;" width="100%">
+            <tr>
+                <td width="20%">
+                    <a href="@Url.Action("AddTest", "Home")" title="Add Test">
+                        Add Test
+                    </a>
+                </td>
+                <td width="60%" />
+                <td width="20%">
+                        <div id="hideDetails" onclick="ShowDetails(true)" role="button">
+                            <span style="color: #0679c4;">Details</span>
+                        </div>
+                        <div id="showDetails" style="display:none;" onclick="HideDetails()" role="button">
+                            Hide Details
+                        </div>
+                </td>
+            </tr>
+        </table>
+
+        <table class="table hoverTable" id="tblTests">
+            <tr>
+                <td>
+                    <b>Procedure</b>
+                </td>
+                <td>
+                    <b>Value</b>
+                </td>
+                <td>
+                    <b>Units</b>
+                </td>
+                <td>
+                    <b>LOW</b>
+                </td>
+                <td>
+                    <b>HIGH</b>
+                </td>
+                <td>
+                    <b>Edit</b>
+                </td>
+                <td>
+                    <b>Delete</b>
+                </td>
+                <td></td>
+            </tr>
+
+            @foreach (var item in Model.Tests)
+            {
+                if (Startup.tblAllTests.Rows.Count > 0)
+                {
+                    if (!(item == null))
+                    if (item.ID > 0)
+                    {
+                        System.Data.DataRow row = Startup.tblAllTests.Select("id = '" + item.ID.ToString() + "'")[0];
+                        string units = (item.ReferenceType == 0 ? row["unitsType"].ToString() : row["unitsTypeSI"].ToString());
+                        string bkgColor = "whiteColor";
+                        if ("boolean;combo;value".IndexOf(units.ToLower()) < 0)
+                        {
+                            decimal number3 = 0;
+                            if (decimal.TryParse(item.Value, out number3))
+                            {
+                                double dblValue = Convert.ToDouble(item.Value);
+                                if (dblValue < Convert.ToDouble(item.LowRangeValue))
+                                    bkgColor = "lowColor";
+                                if (dblValue > Convert.ToDouble(item.HighRangeValue))
+                                    bkgColor = "highColor";
+                            }
+                            else
+                                item.Value = "0";
+                        }
+                        if ("boolean".IndexOf(units.ToLower()) == 0)
+                            if (item.Value.ToLower() == "positive")
+                                bkgColor = "highColor";
+                        if ("combo".IndexOf(units.ToLower()) == 0)
+                        {
+                            string negativeComboValue = row["negativeComboValue"].ToString();
+                            if (item.Value.ToLower() != negativeComboValue.ToLower() && item.Value.Trim() != string.Empty)
+                                bkgColor = "highColor";
+                        }
+
+                        <tr>
+                            @{
+                                string procedure = "";
+                                string description = "";
+                                if (Startup.tblAllTests.Rows.Count > 0)
+                                {
+                                    procedure = row["procedure"].ToString();
+                                    description = row["descriptionHigh"].ToString();
+                                    if (bkgColor == "lowColor")
+                                        description = row["descriptionLow"].ToString();
+                                }
+                            }
+                            <td>
+                                <div class="descriptionTD" data-toggle="tooltip" title="@description" data-placement="right">
+                                    @procedure
+                                </div>
+                                <div class="description" style="display:none; text-align-last: center; color: #0679c4; font-family: verdana, arial, helvetica, sans-serif; font-size: 85%;">
+                                    @description
+                                </div>
+                            </td>
+                            <td>
+                                <div class="@bkgColor">
+                                    @item.Value
+                                </div>
+                            </td>
+                            <td>
+                                @(("boolean;combo;value".IndexOf(units.ToLower()) < 0) ? units : "")
+                            </td>
+                            <td>
+                                @{
+                                    string lowRangeValue = "";
+                                    if ("boolean;combo;value".IndexOf(units.ToLower()) < 0)
+                                        lowRangeValue = item.LowRangeValue.ToString();
+                                    @lowRangeValue
+                                }
+                            </td>
+                            <td>
+                                @{
+                                    string highRangeValue = "";
+                                    if ("boolean;combo;value".IndexOf(units.ToLower()) < 0)
+                                        highRangeValue = item.HighRangeValue.ToString();
+                                    @highRangeValue
+                                }
+                            </td>
+                            <td>
+                                <a href="@Url.Action("EditTest", "Home", new { id = item.ID })" title="Edit Test">
+                                    Edit
+                                </a>
+                            </td>
+                            <td>
+                                <a href="@Url.Action("DeleteTest", "Home", new { id = item.ID })" title="Delete Test">
+                                    Delete
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                }
+            }
+        </table>
+    </div>
+    <br />
+    <br />
+
+    <a id="symptoms" />
+    <div class="activity-item active-item align-content-center">
+        <table style="margin-bottom:6px;" width="100%">
+            <tr>
+                <td width="20%">
+                    <a href="@Url.Action("AddSymptom", "Home")" title="Add Symptom">
+                        Add Symptom
+                    </a>
+                </td>
+                <td width="60%" />
+                <td width="20%">
+                        <div id="hideDetailsSymptoms" onclick="ShowDetailsSymptoms(true)" role="button">
+                            <span style="color: #0679c4;">Details</span>
+                        </div>
+                        <div id="showDetailsSymptoms" style="display:none;" onclick="HideDetailsSymptoms()" role="button">
+                            Hide Details
+                        </div>
+                </td>
+            </tr>
+        </table>
+
+        <table class="table hoverTable" id="tblSymptoms">
+            <tr>
+                <td>
+                    <b>Symptom</b>
+                </td>
+                <td>
+                    <b>Edit</b>
+                </td>
+                <td>
+                    <b>Delete</b>
+                </td>
+                <td></td>
+            </tr>
+
+            @foreach (var item in Model.Symptoms)
+            {
+                if (Startup.tblAllSymptoms.Rows.Count > 0 && item.ID > 0)
+                {
+                    System.Data.DataRow row = Startup.tblAllSymptoms.Select("id = '" + item.ID.ToString() + "'")[0];
+                    string symptom = row["symptom"].ToString();
+                    string similarSymptomsList = row["similarSymptomsList"].ToString();
+                    <tr>
+                        <td>
+                            <div class="symptomTD" data-toggle="tooltip" title="@similarSymptomsList" data-placement="right">
+                                @symptom
+                            </div>
+                            <div class="similarSymptomsList" style="display:none; text-align-last: center; color: #0679c4; font-family: verdana, arial, helvetica, sans-serif; font-size: 85%;">
+                                @similarSymptomsList
+                            </div>
+                        </td>
+                        <td>
+                            <a href="@Url.Action("EditSymptom", "Home", new { id = item.ID })" title="Edit Test">
+                                Edit
+                            </a>
+                        </td>
+                        <td>
+                            <a href="@Url.Action("DeleteSymptom", "Home", new { id = item.ID })" title="Delete Test">
+                                Delete
+                            </a>
+                        </td>
+                    </tr>
+                }
+            }
+        </table>
+    </div>
+    <br />
+    <br />
+    <br />
+    <br />
+</div>
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var style = window.getComputedStyle(document.getElementById('workZone'));
+            if (style.display === 'none') {
+                $.ajax({
+                    type: 'GET',
+                    dataType: 'json',
+                    cache: false,
+                    url: '@Url.Content("~/Home/TestsSymptomsGet")',
+                    data: null,
+                    success: function (data) {
+                        if (data > 1) {
+                            $('#progress').hide();
+                            $('#broken').show();
+                            return;
+                        }
+
+                        // Show progress loader at start up only
+                        if (data === 0) {
+                            $("#tblTests").load(" #tblTests");
+                            $("#tblSymptoms").load(" #tblSymptoms");
+                            // Set timer
+                            var Timer = function (callback, delay) {
+                                var timerId, start, remaining = delay;
+
+                                this.pause = function () {
+                                    window.clearTimeout(timerId);
+                                    remaining -= Date.now() - start;
+                                };
+
+                                this.resume = function () {
+                                    start = Date.now();
+                                    window.clearTimeout(timerId);
+                                    timerId = window.setTimeout(callback, remaining);
+                                };
+
+                                this.resume();
+                            };
+
+                            var timer = new Timer(function () {
+                                $('#progress').hide();
+                                $('#workZone').show();
+                            }, 3000);
+                            timer.pause();
+                            timer.resume();
+                        } else {
+                            $('#progress').hide();
+                            $('#workZone').show();
+                        }
+                    }
+                });
+            }
+        });
+
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+        })
+
+        function HideDetails() {
+            $('.description').hide();
+            $('#hideDetails').show();
+            $('#showDetails').hide();
+        }
+
+        function ShowDetails(show) {
+            if (show) {
+                $('.description').show();
+                $('#hideDetails').hide();
+                $('#showDetails').show();
+            }
+        }
+
+        function HideDetailsSymptoms() {
+            $('.similarSymptomsList').hide();
+            $('#hideDetailsSymptoms').show();
+            $('#showDetailsSymptoms').hide();
+        }
+
+        function ShowDetailsSymptoms(show) {
+            if (show) {
+                $('.similarSymptomsList').show();
+                $('#hideDetailsSymptoms').hide();
+                $('#showDetailsSymptoms').show();
+            }
+        }
+    </script>
+}

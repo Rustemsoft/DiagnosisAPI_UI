@@ -1,0 +1,41 @@
+﻿@model IEnumerable<DDxApi.Models.Disorder>
+<div id="nodata" class="text-center" style="display:none">
+    <p>
+        NOT ENOUGH DATA...
+    </p>
+</div>
+
+<div id="main">
+    <p>
+        Possible Health Conditions
+    </p>
+    <table class="table">
+        @foreach (var item in Model)
+        {
+            if (item.Id > 0)
+            {
+                <tr>
+                    <td>
+                        <a href="@Url.Action("Index", "Disorder", new { id = item.Id })">
+                            <div class="activity-item align-content-center">
+                                <b>@item.Name</b>
+                            </div>
+                        </a>
+                    </td>
+                </tr>
+            }
+        }
+    </table>
+    @if (ViewBag.Message != null) // Show popup alert message
+    {
+        <script type="text/javascript">
+            document.getElementById('main').style.display = 'none';
+            document.getElementById('nodata').style.display = "block";
+        </script>
+    }
+
+</div>
+<br />
+<br />
+
+

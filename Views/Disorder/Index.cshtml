@@ -1,0 +1,410 @@
+﻿@model DDxApi.Models.DisorderTestsSymptomsModel
+@{
+    ViewData["Title"] = "Possible Health Conditions";
+    string shortDescription = @Model.disorder.Description;
+    if (shortDescription.Length > 120)
+        shortDescription = shortDescription.Substring(0, 119).Trim() + "...";
+}
+
+<div>
+    <div class="row text-center">
+        <div class="col-xl-2 col-lg-2 mx-2">
+        </div>
+        <div class="col-xl-8 col-lg-8 mx-8">
+            <p style="text-align-last: center; color: #6EC5E9; font-family: verdana, arial, helvetica, sans-serif; font-size: 120%;">
+                <b><u>@Model.disorder.Name</u></b>
+            </p>
+        </div>
+        <div class="col-xl-2 col-lg-2 mx-2">
+        </div>
+    </div>
+    <div class="row text-center">
+        <div class="col-xl-2 col-lg-2 mx-2">
+        </div>
+        <div class="col-xl-2 col-lg-2 mx-2" style="text-align-last: center; color: dimgray; font-family: verdana, arial, helvetica, sans-serif; font-size: 80%;">
+            ICD9: <b>@Model.disorder.ICD9</b>
+        </div>
+        <div class="col-xl-1 col-lg-1 mx-1">
+        </div>
+        <div class="col-xl-2 col-lg-2 mx-2" style="text-align-last: center; color: dimgray; font-family: verdana, arial, helvetica, sans-serif; font-size: 80%;">
+            ICD10: <b>@Model.disorder.ICD10</b>
+        </div>
+        <div class="col-xl-1 col-lg-1 mx-1">
+        </div>
+        <div class="col-xl-2 col-lg-2 mx-2" style="text-align-last: center; color: dimgray; font-family: verdana, arial, helvetica, sans-serif; font-size: 80%;">
+            ICD11: <b>@Model.disorder.ICD11</b>
+        </div>
+        <div class="col-xl-2 col-lg-2 mx-2">
+        </div>
+    </div>
+
+    <div id="expandAll" style="display:none; text-align:start;">
+        <span style="color: #6EC5E9; font-family: verdana, arial, helvetica, sans-serif; font-size: 90%;" role="button"><u>Expand All</u></span>
+    </div>
+
+    <div id="collapseAll" style="text-align:start;">
+        <span style="color: #6EC5E9; font-family: verdana, arial, helvetica, sans-serif; font-size: 90%;" role="button"><u>Collapse All</u></span>
+    </div>
+
+    <div class="activity-item align-content-center" style="text-align:start;">
+        <div id="expandDesc" style="text-align:start;">
+            @shortDescription
+        </div>
+
+        <div id="collapseDesc" style="display: none; text-align: start;">
+            @Model.disorder.Description.Replace("<NO SYMPTOMS>", string.Empty)
+            <br />
+        </div>
+    </div>
+
+    <div class="activity-item align-content-center" style="text-align:start;">
+        <div id="expandTest0" style="display:none; text-align:start;">
+            <span style="color: #6EC5E9; font-family: verdana, arial, helvetica, sans-serif; font-size: 90%;" role="button">Test Procedures Related to @Model.disorder.Name</span>
+        </div>
+
+        <div id="collapseTest0" style="text-align:start;">
+            <table style="margin-bottom:6px;" width="100%">
+                <tr>
+                    <td id="collapseTest0TD" width="85%">
+                        <span style="color: #6EC5E9; font-family: verdana, arial, helvetica, sans-serif; font-size: 90%;">Test Procedures Entered by You and Related to @Model.disorder.Name</span>
+                    </td>
+                    <td width="1%" />
+                    <td width="14%">
+                        <div id="hideDetails" onclick="ShowDetails(true)" role="button">
+                            <span style="color: #0679c4;">Details</span>
+                        </div>
+                        <div id="showDetails" style="display:none;" onclick="HideDetails()" role="button">
+                            Hide Details
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <table class="table hoverTable" id="tblTest0">
+            <tr>
+                <td>
+                </td>
+                <td>
+                    <span style="color: #6EC5E9; font-size: 75%;">
+                        <b>Procedure</b>
+                    </span>
+                </td>
+                <td>
+                    <span style="color: #6EC5E9; font-size: 75%;">
+                        <b>Value</b>
+                    </span>
+                </td>
+                <td>
+                    <span style="color: #6EC5E9; font-size: 75%;">
+                        <b>Units</b>
+                    </span>
+                </td>
+                <td>
+                    LOW
+                </td>
+                <td>
+                    HIGH
+                </td>
+                <td>
+                </td>
+                <td></td>
+            </tr>
+
+            @foreach (var item in Model.Tests)
+            {
+                if (item.ID > 0)
+                {
+                    System.Data.DataRow row = Startup.tblAllTests.Select("id = '" + item.ID.ToString() + "'")[0];
+                    string units = (item.ReferenceType == 0 ? row["unitsType"].ToString() : row["unitsTypeSI"].ToString());
+                    double LowRangeValue = (item.ReferenceType == 0 ? Convert.ToDouble(row["LowRangeValue"]) : Convert.ToDouble(row["LowRangeValueSI"]));
+                    double HighRangeValue = (item.ReferenceType == 0 ? Convert.ToDouble(row["HighRangeValue"]) : Convert.ToDouble(row["HighRangeValueSI"]));
+                    string bkgColor = "whiteColor";
+                    if ("boolean;combo;value".IndexOf(units.ToLower()) < 0)
+                    {
+                        decimal number3 = 0;
+                        if (decimal.TryParse(item.Value, out number3))
+                        {
+                            double dblValue = Convert.ToDouble(item.Value);
+                            if (dblValue < LowRangeValue)
+                                bkgColor = "lowColor";
+                            if (dblValue > HighRangeValue)
+                                bkgColor = "highColor";
+                        }
+                        else
+                            item.Value = "0";
+                    }
+                    if ("boolean".IndexOf(units.ToLower()) == 0)
+                        if (item.Value.ToLower() == "positive")
+                            bkgColor = "highColor";
+                    if ("combo".IndexOf(units.ToLower()) == 0)
+                    {
+                        string negativeComboValue = row["negativeComboValue"].ToString();
+                        if (item.Value.ToLower() != negativeComboValue.ToLower() && item.Value.Trim() != string.Empty)
+                            bkgColor = "highColor";
+                    }
+
+                    <tr>
+                        @{
+                            string procedure = "";
+                            string description = "";
+                            string link = "";
+                            if (Startup.tblAllTests.Rows.Count > 0)
+                            {
+                                procedure = row["procedure"].ToString();
+                                description = row["descriptionHigh"].ToString();
+                                if (bkgColor == "lowColor")
+                                    description = row["descriptionLow"].ToString();
+                            }
+                        }
+                        <td />
+                        <td>
+                            <div class="descriptionTD" data-toggle="tooltip" title="@description" data-placement="right">
+                                @procedure
+                            </div>
+                            <div class="description" style="display:none; text-align-last: center; color: #0679c4; font-family: verdana, arial, helvetica, sans-serif; font-size: 85%;">
+                                @description
+                            </div>
+                        </td>
+                        <td>
+                            <div class="@bkgColor">
+                                @{
+                                    if ("boolean;combo;value".IndexOf(units.ToLower()) < 0)
+                                    {
+                                        if (item.Entered)
+                                        {
+                                            @item.Status<span>: </span>@item.Value
+                                        }
+                                        else
+                                        {
+                                            @item.Status
+                                        }
+                                    }
+                                    else
+                                    {
+                                        @item.Value
+                                    }
+                                }
+                            </div>
+                        </td>
+                        <td>
+                            @(("boolean;combo;value".IndexOf(units.ToLower()) < 0) ? units : "")
+                        </td>
+                        <td>
+                            @{
+                                string lowRangeValue = "";
+                                if ("boolean;combo;value".IndexOf(units.ToLower()) < 0)
+                                    lowRangeValue = LowRangeValue.ToString();
+                                @lowRangeValue
+                            }
+                        </td>
+                        <td>
+                            @{
+                                string highRangeValue = "";
+                                if ("boolean;combo;value".IndexOf(units.ToLower()) < 0)
+                                    highRangeValue = HighRangeValue.ToString();
+                                @highRangeValue
+                            }
+                        </td>
+                        <td>
+                            @item.Comment
+                        </td>
+                    </tr>
+                }
+            }
+        </table>
+    </div>
+
+    <div class="activity-item align-content-center" style="text-align:start;">
+        <div id="expandSymptom" style="display:none; text-align:start;">
+            <span style="color: #6EC5E9; font-family: verdana, arial, helvetica, sans-serif; font-size: 90%;" role="button">Symptoms of @Model.disorder.Name</span>
+        </div>
+
+        <div id="collapseSymptom" style="text-align:start;">
+            <table style="margin-bottom:6px;" width="100%">
+                <tr>
+                    <td id="collapseSymptomsTD" width="85%">
+                        <span style="color: #6EC5E9; font-family: verdana, arial, helvetica, sans-serif; font-size: 90%;" role="button">Symptoms of @Model.disorder.Name</span>
+                    </td>
+                    <td width="1%" />
+                    <td width="14%">
+                        <div id="hideDetailsSymptoms" onclick="ShowDetailsSymptoms(true)" role="button">
+                            <span style="color: #0679c4;">Details</span>
+                        </div>
+                        <div id="showDetailsSymptoms" style="display:none;" onclick="HideDetailsSymptoms()" role="button">
+                            Hide Details
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div style="text-align:start;">
+            <table class="table hoverTable" id="tblSymptom">
+                @foreach (DDxApi.Models.SymptomGetType smptm in @Model.Symptoms)
+                {
+                    string similarSymptomsList = string.Empty;
+                    try
+                    {
+                        System.Data.DataRow row = Startup.tblAllSymptoms.Select("id = '" + smptm.ID.ToString() + "'")[0];
+                        similarSymptomsList = row["similarSymptomsList"].ToString();
+                    }
+                    catch { }
+                    <tr>
+                        <td>
+                            <div class="symptomTD" data-toggle="tooltip" title="@similarSymptomsList" data-placement="right">
+                                @if (@smptm.Entered)
+                                {
+                                    <span style="color: red">
+                                        <b>
+                                            @smptm.Symptom
+                                        </b>
+                                    </span>
+                                }
+                                else
+                                {
+                                    <b>@smptm.Symptom</b>
+                                }
+                            </div>
+                            <div class="descriptionSymptom" style="display:none; text-align-last: start; color: #0679c4; font-family: verdana, arial, helvetica, sans-serif; font-size: 85%;">
+                                @similarSymptomsList
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </table>
+        </div>
+    </div>
+
+    @if (ViewBag.Message != null) // Show popup alert message
+    {
+        <script type="text/javascript">
+            window.onload = function () {
+                alert("@ViewBag.Message");
+            };
+        </script>
+    }
+
+</div>
+<br />
+<br />
+<br />
+<br />
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#expandAll").click(function () {
+                $('#expandAll').hide();
+                $('#collapseAll').show();
+
+                $('#expandDesc').hide();
+                $('#collapseDesc').show();
+
+                $('#expandTest0').hide();
+                $('#collapseTest0').show();
+                $('#tblTest0').show();
+
+                $('#expandSymptom').hide();
+                $('#collapseSymptom').show();
+                $('#tblSymptom').show();
+            });
+
+            $("#collapseAll").click(function () {
+                $('#expandAll').show();
+                $('#collapseAll').hide();
+
+                $('#expandDesc').show();
+                $('#collapseDesc').hide();
+
+                $('#expandTest0').show();
+                $('#collapseTest0').hide();
+                $('#tblTest0').hide();
+
+                $('#expandSymptom').show();
+                $('#collapseSymptom').hide();
+                $('#tblSymptom').hide();
+            });
+
+            $("#expandDesc").click(function () {
+                $('#expandDesc').hide();
+                $('#collapseDesc').show();
+            });
+
+            $("#collapseDesc").click(function () {
+                $('#expandDesc').show();
+                $('#collapseDesc').hide();
+            });
+
+            $("#expandTest0").click(function () {
+                $('#expandTest0').hide();
+                $('#collapseTest0').show();
+                $('#tblTest0').show();
+            });
+
+            $("#collapseTest0TD").click(function () {
+                $('#expandTest0').show();
+                $('#collapseTest0').hide();
+                $('#tblTest0').hide();
+            });
+
+            $("#expandSymptom").click(function () {
+                $('#expandSymptom').hide();
+                $('#collapseSymptom').show();
+                $('#tblSymptom').show();
+            });
+
+            $("#collapseSymptomsTD").click(function () {
+                $('#expandSymptom').show();
+                $('#collapseSymptom').hide();
+                $('#tblSymptom').hide();
+            });
+        });
+
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+        })
+
+        function HideDetails() {
+            $('.description').hide();
+            $('#hideDetails').show();
+            $('#showDetails').hide();
+        }
+
+        function ShowDetails(show) {
+            if (show) {
+                $('.description').show();
+                $('#hideDetails').hide();
+                $('#showDetails').show();
+            }
+        }
+
+        function HideDetails1() {
+            $('.description1').hide();
+            $('#hideDetails1').show();
+            $('#showDetails1').hide();
+        }
+
+        function ShowDetails1(show) {
+            if (show) {
+                $('.description1').show();
+                $('#hideDetails1').hide();
+                $('#showDetails1').show();
+            }
+        }
+
+        function HideDetailsSymptoms() {
+            $('.descriptionSymptom').hide();
+            $('#hideDetailsSymptoms').show();
+            $('#showDetailsSymptoms').hide();
+        }
+
+        function ShowDetailsSymptoms(show) {
+            if (show) {
+                $('.descriptionSymptom').show();
+                $('#hideDetailsSymptoms').hide();
+                $('#showDetailsSymptoms').show();
+            }
+        }
+    </script>
+}

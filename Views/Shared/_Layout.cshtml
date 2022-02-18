@@ -1,0 +1,92 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Diagnosis UI</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="~/assets/css/bootstrap.min.css">
+    <!-- Main Style -->
+    <link rel="stylesheet" href="~/assets/css/main.css">
+    <!-- Normalize Style -->
+    <link rel="stylesheet" href="~/assets/css/normalize.css">
+    <!-- Fonts Awesome -->
+    <link rel="stylesheet" href="~/assets/fonts/font-awesome.min.css">
+
+    <!-- Animate CSS -->
+    <link rel="stylesheet" href="~/assets/extras/animate.css" type="text/css">
+    <!-- Owl Carousel -->
+    <link rel="stylesheet" href="~/assets/extras/owl.carousel.css" type="text/css">
+    <link rel="stylesheet" href="~/assets/extras/owl.theme.css" type="text/css">
+    <!-- Rev Slider Css -->
+    <link rel="stylesheet" href="~/assets/extras/settings.css" type="text/css">
+    <!-- Nivo Lightbox Css -->
+    <link rel="stylesheet" href="~/assets/extras/nivo-lightbox.css" type="text/css">
+    <!-- Slicknav Css -->
+    <link rel="stylesheet" href="~/assets/css/slicknav.css" type="text/css">
+    <!-- Responsive Style -->
+    <link rel="stylesheet" href="~/assets/css/responsive.css">
+
+    <!-- Color CSS Styles  -->
+    <link rel="stylesheet" type="text/css" href="~/assets/css/colors/sky.css" media="screen" />
+
+    <link rel="stylesheet" href="~/css/prism.css">
+    <link rel="stylesheet" href="~/css/chosen.css">
+
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-dark border-bottom box-shadow mb-3" style="font-size: 100%; margin: 0px; padding: 0px;">
+            <div class="container">
+                <a class="navbar-brand text-white" href="http://ddxhub.com">DDxHub</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <div style="float: left; width: 45%;">
+                        <ul class="navbar-nav flex-grow-1">
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Index">Tests</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Index" asp-fragment="symptoms">Symptoms</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-area="" asp-controller="Analyze" asp-action="Index">Analyze</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted" style="position: fixed;">
+        <div class="container">
+            <div style="float: left; width: 45%;">
+                &copy; 2021 - <a href="http://ddxhub.com" style="color: #0094ff">DDxHub</a>
+            </div>
+            <div style="float: right; text-align: right; width: 45%;">
+                @Html.AntiForgeryToken()
+                @Html.ActionLink(" Analyze ", "Index", "Analyze", null, new { @class = "btn btn-info btn-sm" })
+            </div>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/chosen.jquery.js" type="text/javascript"></script>
+    <script src="~/js/prism.js" type="text/javascript" charset="utf-8"></script>
+    <script src="~/js/init.js" type="text/javascript" charset="utf-8"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

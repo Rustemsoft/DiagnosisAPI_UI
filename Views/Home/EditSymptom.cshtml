@@ -1,0 +1,185 @@
+﻿@model DDxApi.Models.SymptomGetType
+
+@{
+    ViewBag.Title = "Edit Symptom";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    string similar = "";
+    try
+    {
+        if (Model != null)
+            similar = (Model.SimilarSymptomsList ?? "");
+    }
+    catch { }
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div class="activity-item align-content-center">
+            <div class="row text-center">
+                <div class="col-xl-1 col-lg-1 mx-1">
+                </div>
+                <div class="col-xl-10 col-lg-10 mx-10">
+                    <form method="post" data-ajax="true" data-ajax-method="post">
+                        <div class="form-group">
+                            <div class="row text-center">
+                                <div class="col-xl-1 col-lg-1 mx-1">
+                                </div>
+                                <div class="col-xl-7 col-lg-7 mx-7">
+                                    <label class="text-info">EDIT Symptom</label>
+                                    <div id="divSymptoms" style="height: 75px;">
+                                        @Html.DropDownListFor(model => model.ID, new SelectList(Startup.symptomsDropdownListAll, "id", "symptom"), "∙ Select Symptom", new { @class = "form-control", @style = "width: 100%;", id = "ddlSymptoms" })
+                                    </div>
+
+                                    @Html.DropDownListFor(model => model.ID, new SelectList(Startup.symptomsDropdownList, "id", "symptom"), "∙ Select Symptom", new { @class = "form-control", @style = "display: none;", id = "ddlSymptomsByPanel" })
+                                </div>
+                                <div class="col-xl-1 col-lg-1 mx-1">
+                                        <div id="hideDetails" style="padding-top: 30px;" onclick="ShowDetails(true)" role="button">
+                                            <span style="color: #0679c4;">Details</span>
+                                        </div>
+                                        <div id="showDetails" style="display:none;" onclick="HideDetails()" role="button">
+                                            <label>Hide Details</label>
+                                        </div>
+                                </div>
+                                <div class="col-xl-2 col-lg-2 mx-2">
+                                    <label class="text-info">Categories</label>
+                                    @Html.DropDownList("categories", new SelectList(Startup.categoriesDropdownList, "sid", "category"), null, new { @class = "form-control", id = "ddlCategories" })
+                                </div>
+                                <div class="col-xl-1 col-lg-1 mx-1">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-xl-1 col-lg-1 mx-1">
+                </div>
+            </div>
+            <div class="row text-center">
+                <div class="col-xl-1 col-lg-1 mx-1">
+                </div>
+                <div class="description col-xl-10 col-lg-10 mx-10" style="display:none;">
+                        <label id="symptomsSimilar" style="color: darkslategray; font-family: verdana, arial, helvetica, sans-serif; font-size: 70%;">@similar</label>
+                        <br />
+                </div>
+                <div class="col-xl-1 col-lg-1 mx-1">
+                </div>
+            </div>
+
+            <div>
+                <label class="btn btn-outline-light"> </label>
+                <input type="submit" value="save" class="btn btn-success btn-sm" />
+            </div>
+
+            @if (ViewBag.Message != null) // Show popup alert message
+            {
+                <script type="text/javascript">
+                    window.onload = function () {
+                        alert("@ViewBag.Message");
+                    };
+                </script>
+            }
+
+        </div>
+    </div>
+}
+<br />
+<br />
+<br />
+
+@section Scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+
+            $("#ddlSymptoms").change(function () {
+                setDdlSymptoms($('#ddlSymptoms'), false);
+                document.getElementById('ddlSymptomsByPanel').value = document.getElementById('ddlSymptoms').value;
+            });
+
+            $("#ddlSymptomsByPanel").change(function () {
+                setDdlSymptoms($('#ddlSymptomsByPanel'), false);
+                document.getElementById('ddlSymptoms').value = document.getElementById('ddlSymptomsByPanel').value;
+            });
+
+            // Categories
+            $("#ddlCategories").change(function () {
+                var viewModel = { category: $("#ddlCategories option:selected").text() };
+                $.ajax({
+                    type: 'GET',
+                    dataType: 'json',
+                    cache: false,
+                    url: '@Url.Content("~/Home/CategoryChangeGet")',
+                    data: viewModel,
+                    success: function (data) {
+                        if (data != null) {
+                            var newOptions = (data).split(";");
+                            var $el = $("#ddlSymptomsByPanel");
+                            $el.empty(); // remove old options
+                            var div_data = "<option value=0>∙ Select Symptom </option>";
+                            $(div_data).appendTo($el);
+                            $.each(newOptions, function (i, val) {
+                                if (val !== "") {
+                                    var opt = (val).split("|");
+                                    var div_data = "<option value=" + opt[0] + ">" + opt[1] + "</option>";
+                                    $(div_data).appendTo($el);
+                                }
+                            });
+                        }
+                        if (viewModel.category == "ALL") {
+                            $('#divSymptoms').show();
+                            $('#ddlSymptomsByPanel').hide();
+                            setDdlSymptoms($('#ddlSymptoms'), true);
+                            document.getElementById('ddlSymptomsByPanel').value = document.getElementById('ddlSymptoms').value;
+                        } else {
+                            $('#divSymptoms').hide();
+                            $('#ddlSymptomsByPanel').show();
+                            setDdlSymptoms($('#ddlSymptomsByPanel'), true);
+                            document.getElementById('ddlSymptoms').value = document.getElementById('ddlSymptomsByPanel').value;
+                        }
+                    }
+                });
+            });
+        });
+
+        function setDdlSymptoms(sel, empty) {
+            var _model = { symptomID: sel.val() };
+            $.ajax({
+                type: 'GET',
+                dataType: 'json',
+                cache: false,
+                url: '@Url.Content("~/Home/SymptomChangeGet")',
+                data: _model,
+                success: function (response) {
+                    if (response != null) {
+                        if (response.similarSymptomsList.indexOf('symptom is already added') >= 0) {
+                            var str = response.similarSymptomsList.split("!");
+                            alert(str[0] + "!");
+                            response.similarSymptomsList = str[1];
+                            document.getElementById('ddlSymptoms').value = response.id;
+                            document.getElementById('ddlSymptomsByPanel').value = response.id;
+                        }
+                        document.getElementById('symptomsSimilar').textContent = !empty ? response.similarSymptomsList : '';
+                    } else {
+                        alert("Something went wrong");
+                    }
+                }
+            });
+        }
+
+        function HideDetails() {
+            $('.description').hide();
+            $('#hideDetails').show();
+            $('#showDetails').hide();
+        }
+
+        function ShowDetails(show) {
+            if (show) {
+                $('.description').show();
+                $('#hideDetails').hide();
+                $('#showDetails').show();
+            }
+        }
+    </script>
+}
