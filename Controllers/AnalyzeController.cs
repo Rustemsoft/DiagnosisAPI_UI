@@ -58,6 +58,7 @@ namespace DDxHub.Controllers
                 }
                 else
                     System.Threading.Thread.Sleep(500);
+            
             // Break after 45 seconds attempting to get Disorders from DiagnosisApi Web API
             if (!Startup.itemGotten)
                 ViewBag.Message = "Something went wrong. Please Try Again Later.";
