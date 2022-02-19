@@ -17,7 +17,6 @@ namespace DDxHub.Controllers
         {
             Startup.itemAdded = false;
             Startup.itemGotten = false;
-
             // Create a unique number as a client's fingerprinting identifier.
             // If you decide to use a constant like itemID = "1", the data 
             // entered by your different clients can be intercepted and mixed.
