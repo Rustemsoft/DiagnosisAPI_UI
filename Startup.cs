@@ -24,7 +24,7 @@ namespace DDxHub
         // Your registration AuthenticationID you need to provide to GET and POST to Diagnosis API
         // For Demo development AuthenticationID = DEMO_AuthenticationID
         public static string AuthenticationID = "?AuthenticationID=DEMO_AuthenticationID";
-
+        
         // List of all UI entered Test Procedures
         public static List<TestPostType> tests = new List<TestPostType>();
 
